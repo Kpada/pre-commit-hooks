@@ -1,2 +1,3 @@
 pytest==8.2.2
 pre-commit==3.5.0
+shfmt-py==3.7.0.1
