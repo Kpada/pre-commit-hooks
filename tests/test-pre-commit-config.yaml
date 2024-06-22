@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: shfmt
+        name: shfmt
+        entry: ./hooks/shfmt
+        language: script
+        types: [shell]
+        args:
+          - -i
+          - "2"

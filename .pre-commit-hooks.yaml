@@ -1,0 +1,7 @@
+---
+- id: shfmt
+  name: shfmt
+  description: Shell script formatter
+  entry: hooks/shfmt
+  language: script
+  types: [shell]

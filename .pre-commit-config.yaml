@@ -1,0 +1,38 @@
+---
+fail_fast: false
+
+repos:
+  # General hooks for various common checks.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        exclude: ^.*\.svd$
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=auto"]
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: shfmt
+        name: shfmt
+        entry: ./hooks/shfmt
+        language: script
+        types: [shell]
+        args:
+          - -i
+          - "2"
+          - -ci
+          - -s
+      - id: run-tests
+        name: run-tests
+        entry: pytest
+        language: system
+        pass_filenames: false

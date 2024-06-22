@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -o errexit -o nounset -o pipefail
+
+# Checks if the shfmt tool is installed.
+check_shfmt_installed() {
+  if ! command -v shfmt >/dev/null 2>&1; then
+    echo >&2 'Error: shfmt is not installed.'
+    exit 1
+  fi
+}
+
+# Checks the version of the shfmt tool.
+check_shfmt_version() {
+  local version
+  version="$(shfmt -version 2>&1)"
+
+  # Extract the major version number.
+  local major_version
+  major_version=$(echo "${version}" | grep -oE 'v[0-9]+' | cut -d'v' -f2)
+
+  # Check if the version is v3 or higher.
+  if [ "${major_version}" -lt 3 ]; then
+    echo >&2 'Error: shfmt v3 or higher is required.'
+    exit 1
+  fi
+}
+
+# Runs the shfmt tool on a specified file with the given options.
+#
+# Parameters:
+#   - $1: The file to format.
+#   - $*: The list of shfmt options.
+run_shfmt_on_file() {
+  declare -r file="${1:?Missing file parameter}"
+  shift
+  declare -ar options=("$@")
+
+  if ! shfmt "${options[@]}" --write --diff "${file}" >/dev/null 2>&1; then
+    echo "${file}"
+  fi
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    echo >&2 'Error: No arguments specified'
+    exit 1
+  fi
+
+  check_shfmt_installed
+  check_shfmt_version
+
+  # Separate options and files.
+  local options=()
+  local files=()
+
+  for arg in "$@"; do
+    if [[ -f ${arg} ]]; then
+      files+=("${arg}")
+    else
+      options+=("${arg}")
+    fi
+  done
+
+  # Run shfmt on each file with the collected options.
+  local failed=0
+  for file in "${files[@]}"; do
+    if ! run_shfmt_on_file "${file}" "${options[@]}"; then
+      failed=1
+    fi
+  done
+
+  exit ${failed}
+}
+
+main "$@"
