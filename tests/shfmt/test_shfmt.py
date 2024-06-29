@@ -46,6 +46,7 @@ def test_pre_commit_shfmt():
         expected_output_pattern = re.compile(
             r"shfmt\S+Failed\n"
             r"- hook id: shfmt\n"
+            r"- exit code: 1\n"
             r"- files were modified by this hook\n\n" + re.escape(relative_script_path) + r"\n+"
         )
 

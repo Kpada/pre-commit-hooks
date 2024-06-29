@@ -26,18 +26,33 @@ check_shfmt_version() {
   fi
 }
 
+# Checks if the given options are valid for the shfmt command.
+#
+# Parameters:
+#   - options: An array of options to be passed to the shfmt command.
+check_options() {
+  local -ar options=("$@")
+  local -r filename='/dev/null'
+
+  if ! shfmt "${options[@]}" ${filename} >/dev/null 2>&1; then
+    echo >&2 "Error: Invalid args '${options[*]}'"
+    exit 1
+  fi
+}
+
 # Runs the shfmt tool on a specified file with the given options.
 #
 # Parameters:
 #   - $1: The file to format.
 #   - $*: The list of shfmt options.
 run_shfmt_on_file() {
-  declare -r file="${1:?Missing file parameter}"
+  local -r file="${1:?Missing file parameter}"
   shift
-  declare -ar options=("$@")
+  local -ar options=("$@")
 
   if ! shfmt "${options[@]}" --write --diff "${file}" >/dev/null 2>&1; then
     echo "${file}"
+    return 1
   fi
 }
 
@@ -53,14 +68,18 @@ main() {
   # Separate options and files.
   local options=()
   local files=()
+  local found_first_file=false
 
   for arg in "$@"; do
-    if [[ -f ${arg} ]]; then
+    if [[ ${found_first_file} == true || -f ${arg} ]]; then
       files+=("${arg}")
+      found_first_file=true
     else
       options+=("${arg}")
     fi
   done
+
+  check_options "${options[@]}"
 
   # Run shfmt on each file with the collected options.
   local failed=0
