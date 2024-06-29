@@ -26,4 +26,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --all-files --vebrose
