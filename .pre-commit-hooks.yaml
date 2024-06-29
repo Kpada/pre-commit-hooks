@@ -5,3 +5,10 @@
   entry: hooks/shfmt
   language: script
   types: [shell]
+
+- id: clang-tidy-nolint
+  name: clang-tidy-nolint
+  description: Formats clang-tidy NOLINT comments and removes unused ones
+  entry: python ./hooks/clang_tidy_nolint.py
+  language: python
+  types: [c, c++]

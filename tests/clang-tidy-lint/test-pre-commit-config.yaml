@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+      - id: clang-tidy-nolint
+        name: clang-tidy-nolint
+        entry: python ./hooks/clang_tidy_nolint.py
+        language: python
+        files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        args:
+          - --config-file
+          - tests/clang-tidy-lint/.clang-tidy
+          - --clang-tidy-binary
+          - /usr/bin/clang-tidy
+          - --fix

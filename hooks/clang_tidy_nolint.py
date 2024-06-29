@@ -1,0 +1,151 @@
+""" Formats clang-tidy NOLINT comments and removes unused ones. """
+
+import re
+import argparse
+import subprocess
+import os
+
+
+def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str = None) -> list[str]:
+    """
+    Retrieves a list of enabled checks from the clang-tidy binary.
+
+    Args:
+        clang_tidy_bin (str): The path to the clang-tidy binary.
+        clang_tidy_config (str, optional): The path to the clang-tidy configuration file.
+
+    Returns:
+        List[str]: A list of enabled checks.
+
+    Raises:
+        RuntimeError: If there is an error running clang-tidy.
+    """
+    if not os.path.exists(clang_tidy_bin):
+        raise RuntimeError(f"Clang-tidy binary not found: {clang_tidy_bin}")
+
+    # Command to retrieve the list of enabled checks.
+    cmd = [clang_tidy_bin, "--list-checks"]
+
+    # Use the configuration file if provided.
+    if clang_tidy_config:
+        if not os.path.exists(clang_tidy_config):
+            raise RuntimeError(f"Config file not found: {clang_tidy_config}")
+        cmd.append("--config-file")
+        cmd.append(clang_tidy_config)
+
+    # Run clang-tidy and retrieve the list of enabled checks.
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"Error running clang-tidy: {result.stderr}")
+
+    # Parse.
+    checks = []
+    in_checks_section = False
+    for line in result.stdout.split("\n"):
+        if line.strip() == "Enabled checks:":
+            in_checks_section = True
+        elif in_checks_section:
+            check = line.strip()
+            if check:
+                checks.append(check)
+
+    return checks
+
+
+def update_checks(content: str, enabled_checks: list[str]) -> str:
+    """
+    Updates the NOLINT comments in the given content to only include the enabled checks.
+
+    Args:
+        content (str): The content to update.
+        enabled_checks (List[str]): The list of enabled checks.
+
+    Returns:
+        str: The updated content.
+    """
+
+    def process_nolint_comment(match: re.Match) -> str:
+        comment = match.group(1)
+        trailing_comment = match.group(2).strip()
+        if "(" in comment and ")" in comment:  # If there are rules in the comment
+            prefix, rules_part = comment.split("(", 1)
+            rules_part = rules_part.rstrip(")")
+            rules = rules_part.split(",")
+            rules = [rule.strip() for rule in rules]
+
+            # Keep only enabled rules
+            kept_rules = []
+            for rule in rules:
+                if rule in enabled_checks:
+                    kept_rules.append(rule)
+                elif "*" in rule:
+                    # Create a regex pattern to match the wildcard rule
+                    pattern = re.compile(rule.replace("*", ".*"))
+                    for enabled_check in enabled_checks:
+                        if pattern.fullmatch(enabled_check):
+                            kept_rules.append(rule)
+                            break
+
+            # Return the new comment or None if no rules are left
+            if kept_rules:
+                return f"// {prefix}({', '.join(kept_rules)}) {trailing_comment}".rstrip()
+            else:
+                return ""
+        else:
+            return match.group(0)  # Return the whole match if no rules are specified
+
+    # Regex to match NOLINT comments with and without rules, and optional trailing comments
+    nolint_pattern = re.compile(r"//\s*(NOLINT(?:BEGIN|END|NEXTLINE)?(?:\([^)]*\))?)\s*(.*)")
+
+    processed_lines = []
+    for line in content.split("\n"):
+        original_line = line
+        new_line = nolint_pattern.sub(process_nolint_comment, line)
+        # Remove empty NOLINT comments but preserve formatting
+        new_line = re.sub(r"//\s*NOLINT(?:BEGIN|END|NEXTLINE)?\(\s*\)\s*$", "", new_line).rstrip()
+
+        if (
+            new_line != original_line.strip()
+        ):  # Only change the line if the NOLINT comment was modified
+            processed_lines.append(new_line)
+        else:
+            processed_lines.append(original_line)
+
+    return "\n".join(processed_lines)
+
+
+def main():
+    """
+    Processes C++ files to remove unused NOLINT comments.
+    """
+    parser = argparse.ArgumentParser(description="Remove unused NOLINT comments from C++ files.")
+    parser.add_argument(
+        "--config-file", required=False, help="Path to the .clang-tidy configuration file."
+    )
+    parser.add_argument("--clang-tidy-binary", required=True, help="Path to the clang-tidy binary.")
+    parser.add_argument(
+        "--fix", required=False, default=False, action="store_true", help="Fix the files."
+    )
+    parser.add_argument("files", nargs="+", help="Files to process.")
+    args = parser.parse_args()
+
+    enabled_checks = get_enabled_checks(args.clang_tidy_binary, args.config_file)
+
+    for file in args.files:
+        with open(file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        new_content = update_checks(content, enabled_checks)
+
+        # Write the new content to the file.
+        if args.fix:
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(new_content)
+
+        # Print the name of the file if it was modified.
+        if new_content != content:
+            print(f"{file}")
+
+
+if __name__ == "__main__":
+    main()
