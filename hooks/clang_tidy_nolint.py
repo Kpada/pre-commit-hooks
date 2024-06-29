@@ -7,6 +7,7 @@ import subprocess
 import os
 from typing import List, Optional
 import shutil
+import sys
 
 
 def get_clang_tidy_path() -> Optional[str]:
@@ -151,6 +152,7 @@ def main():
 
     enabled_checks = get_enabled_checks(args.clang_tidy_binary, args.config_file)
 
+    ret_code = 0
     for file in args.files:
         with open(file, "r", encoding="utf-8") as f:
             content = f.read()
@@ -165,6 +167,9 @@ def main():
         # Print the name of the file if it was modified.
         if new_content != content:
             print(f"{file}")
+            ret_code = 1
+
+    sys.exit(ret_code)
 
 
 if __name__ == "__main__":
