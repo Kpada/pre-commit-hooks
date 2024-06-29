@@ -64,6 +64,7 @@ def test_clang_tidy_lint():
         expected_output_pattern = re.compile(
             r"clang-tidy-nolint\S+Failed\n"
             r"- hook id: clang-tidy-nolint\n"
+            r"- exit code: 1\n"
             r"- files were modified by this hook\n\n" + re.escape(relative_in_file_path) + r"\n+"
         )
 
