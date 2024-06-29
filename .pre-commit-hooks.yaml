@@ -9,6 +9,6 @@
 - id: clang-tidy-nolint
   name: clang-tidy-nolint
   description: Formats clang-tidy NOLINT comments and removes unused ones
-  entry: python ./hooks/clang_tidy_nolint.py
+  entry: clang_tidy_nolint.py
   language: python
-  types: [c, c++]
+  files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$

@@ -9,6 +9,4 @@ repos:
         args:
           - --config-file
           - tests/clang-tidy-lint/.clang-tidy
-          - --clang-tidy-binary
-          - /usr/bin/clang-tidy
           - --fix

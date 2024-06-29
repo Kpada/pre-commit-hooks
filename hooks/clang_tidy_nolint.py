@@ -1,18 +1,35 @@
+#!/usr/bin/env python
 """ Formats clang-tidy NOLINT comments and removes unused ones. """
 
 import re
 import argparse
 import subprocess
 import os
+from typing import List, Optional
+import shutil
 
 
-def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str = None) -> list[str]:
+def get_clang_tidy_path() -> Optional[str]:
+    """
+    Returns the path of the 'clang-tidy' binary if it is found in the system's PATH.
+
+    Returns:
+        str: The path of the 'clang-tidy' binary, or None if it is not found.
+    """
+    clang_tidy_path = shutil.which("clang-tidy")
+    if clang_tidy_path:
+        return clang_tidy_path
+
+    return None
+
+
+def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str) -> List[str]:
     """
     Retrieves a list of enabled checks from the clang-tidy binary.
 
     Args:
         clang_tidy_bin (str): The path to the clang-tidy binary.
-        clang_tidy_config (str, optional): The path to the clang-tidy configuration file.
+        clang_tidy_config (str): The path to the clang-tidy configuration file.
 
     Returns:
         List[str]: A list of enabled checks.
@@ -22,16 +39,11 @@ def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str = None) -> li
     """
     if not os.path.exists(clang_tidy_bin):
         raise RuntimeError(f"Clang-tidy binary not found: {clang_tidy_bin}")
+    if not os.path.exists(clang_tidy_config):
+        raise RuntimeError(f"Clang-tidy configuration not found: {clang_tidy_config}")
 
     # Command to retrieve the list of enabled checks.
-    cmd = [clang_tidy_bin, "--list-checks"]
-
-    # Use the configuration file if provided.
-    if clang_tidy_config:
-        if not os.path.exists(clang_tidy_config):
-            raise RuntimeError(f"Config file not found: {clang_tidy_config}")
-        cmd.append("--config-file")
-        cmd.append(clang_tidy_config)
+    cmd = [clang_tidy_bin, "--list-checks", "--config-file", clang_tidy_config]
 
     # Run clang-tidy and retrieve the list of enabled checks.
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
@@ -52,7 +64,7 @@ def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str = None) -> li
     return checks
 
 
-def update_checks(content: str, enabled_checks: list[str]) -> str:
+def update_checks(content: str, enabled_checks: List[str]) -> str:
     """
     Updates the NOLINT comments in the given content to only include the enabled checks.
 
@@ -120,9 +132,17 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Remove unused NOLINT comments from C++ files.")
     parser.add_argument(
-        "--config-file", required=False, help="Path to the .clang-tidy configuration file."
+        "--config-file",
+        required=False,
+        default=".clang-tidy",
+        help="Path to the .clang-tidy configuration file.",
     )
-    parser.add_argument("--clang-tidy-binary", required=True, help="Path to the clang-tidy binary.")
+    parser.add_argument(
+        "--clang-tidy-binary",
+        required=False,
+        default=get_clang_tidy_path(),
+        help="Path to the clang-tidy binary.",
+    )
     parser.add_argument(
         "--fix", required=False, default=False, action="store_true", help="Fix the files."
     )
