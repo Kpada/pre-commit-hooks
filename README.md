@@ -25,23 +25,31 @@ Example:
 
 ### clang-tidy-nolint
 
-Formats [clang-tidy](https://clang.llvm.org/extra/clang-tidy) `NOLINT` comments
-and removes unused ones.
+The hook helps maintain a clean codebase by detecting and removing obsolete
+[clang-tidy](https://clang.llvm.org/extra/clang-tidy) `NOLINT` comments. These
+comments might become redundant after updates to your `.clang-tidy`
+configuration, as checks may no longer be relevant.
+
+This hook ensures the codebase stays up-to-date by eliminating these outdated
+comments.
 
 Arguments:
 
-- `--config-file`: path to config file, `.clang-tidy` by default.
-- `--clang-tidy-binary`: path to clang-tidy binary, the one in `PATH` by
-  default.
-- `--fix`: apply fixes
+- `--clang-tidy-binary`: Specifies the path to the clang-tidy binary. Since the
+  list of supported checks depends on the clang-tidy version, the binary is used
+  to find the relevant checks. Defaults to the clang-tidy binary found in the
+  `PATH`.
+- `--config-file`: Specifies the path to the `.clang-tidy` configuration file.
+  Defaults to `.clang-tidy` in the current directory.
+- `--no-fix`: If set, the hook will not overwrite files.
+- `--separator`: Specifies the separator string between several checks in a
+  `NOLINT` comment. Defaults to ' '.
 
 Example:
 
 ```yaml
 hooks:
   - id: clang-tidy-nolint
-    args:
-      - --fix
 ```
 
 ## Development

@@ -65,13 +65,14 @@ def get_enabled_checks(clang_tidy_bin: str, clang_tidy_config: str) -> List[str]
     return checks
 
 
-def update_checks(content: str, enabled_checks: List[str]) -> str:
+def update_checks(content: str, enabled_checks: List[str], separator: str) -> str:
     """
     Updates the NOLINT comments in the given content to only include the enabled checks.
 
     Args:
         content (str): The content to update.
         enabled_checks (List[str]): The list of enabled checks.
+        separator (str): The separator to use for multiple checks in a NOLINT comment.
 
     Returns:
         str: The updated content.
@@ -101,7 +102,9 @@ def update_checks(content: str, enabled_checks: List[str]) -> str:
 
             # Return the new comment or None if no rules are left
             if kept_rules:
-                return f"// {prefix}({', '.join(kept_rules)}) {trailing_comment}".rstrip()
+                return (
+                    f"// {prefix}({f',{separator}'.join(kept_rules)}) {trailing_comment}".rstrip()
+                )
             else:
                 return ""
         else:
@@ -145,7 +148,13 @@ def main():
         help="Path to the clang-tidy binary.",
     )
     parser.add_argument(
-        "--fix", required=False, default=False, action="store_true", help="Fix the files."
+        "--no_fix", required=False, default=False, action="store_true", help="Fix the files."
+    )
+    parser.add_argument(
+        "--separator",
+        required=False,
+        default=" ",
+        help="Separator for several checks in a NOLINT comment.",
     )
     parser.add_argument("files", nargs="+", help="Files to process.")
     args = parser.parse_args()
@@ -157,10 +166,10 @@ def main():
         with open(file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        new_content = update_checks(content, enabled_checks)
+        new_content = update_checks(content, enabled_checks, args.separator)
 
         # Write the new content to the file.
-        if args.fix:
+        if not args.no_fix:
             with open(file, "w", encoding="utf-8") as f:
                 f.write(new_content)
 
