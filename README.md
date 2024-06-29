@@ -4,7 +4,45 @@ A set of [pre-commit](https://pre-commit.com/) hooks for various languages.
 
 ## Supported Hooks
 
-- [shfmt](https://github.com/mvdan/sh)
+- [shfmt](#shfmt)
+- [clang-tidy-nolint](#clang-tidy-nolint)
+
+### shfmt
+
+Runs [shfmt](https://github.com/mvdan/sh) on the specified files with the given
+options and overwrites them if necessary.
+
+Example:
+
+```yaml
+- id: shfmt
+  args:
+    - -i
+    - "2"
+    - -ci
+    - -s
+```
+
+### clang-tidy-nolint
+
+Formats [clang-tidy](https://clang.llvm.org/extra/clang-tidy) `NOLINT` comments
+and removes unused ones.
+
+Arguments:
+
+- `--config-file`: path to config file, `.clang-tidy` by default.
+- `--clang-tidy-binary`: path to clang-tidy binary, the one in `PATH` by
+  default.
+- `--fix`: apply fixes
+
+Example:
+
+```yaml
+hooks:
+  - id: clang-tidy-nolint
+    args:
+      - --fix
+```
 
 ## Development
 
