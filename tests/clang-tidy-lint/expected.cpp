@@ -24,8 +24,10 @@ int xyz = 0;
 
 // NOLINTNEXTLINE(modernize-use-using)
 int main() {
-    std::cout << "Hello, World!" << std::endl; // NOLINT(modernize-use-using)
-    std::cout << "NOLINT(modernize-use-nullptr)" << std::endl;
+  std::cout << "Hello, World!" << std::endl; // NOLINT(modernize-use-using, *keep-me)
+  std::cout << "NOLINT(modernize-use-nullptr)" << std::endl;
+
+  return 0; // NOLINT(test-keep-me, clang-diagnostic-error)
 }
 // NOLINTEND(modernize-avoid-bind)
 

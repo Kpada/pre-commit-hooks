@@ -27,8 +27,10 @@ int xyz = 0; // NOLINT(foo-bar, *-bar, foo-*)
 
 // NOLINTNEXTLINE(modernize-use-using, foo)
 int main() {
-    std::cout << "Hello, World!" << std::endl; // NOLINT(modernize-use-nullptr,modernize-use-using, *keep-me,modernize-use-nullptr)
-    std::cout << "NOLINT(modernize-use-nullptr)" << std::endl;   // NOLINT(modernize-use-nullptr)
+  std::cout << "Hello, World!" << std::endl; // NOLINT(modernize-use-nullptr,modernize-use-using, *keep-me,modernize-use-nullptr)
+  std::cout << "NOLINT(modernize-use-nullptr)" << std::endl;   // NOLINT(modernize-use-nullptr)
+
+  return 0; // NOLINT(test-keep-me,test-keep-me2,clang-diagnostic-error)
 }
 // NOLINTEND(modernize-avoid-bind)
 // NOLINTEND(foo)

@@ -9,3 +9,5 @@ repos:
         args:
           - --config-file
           - tests/clang-tidy-lint/.clang-tidy
+          - --extra-checks
+          - "clang-diagnostic-error, test-keep-me"

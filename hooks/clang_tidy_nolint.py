@@ -139,27 +139,47 @@ def main():
         "--config-file",
         required=False,
         default=".clang-tidy",
-        help="Path to the .clang-tidy configuration file.",
+        help="Path to the .clang-tidy file. "
+        "Used to get the list of enabled checks for this specific version of clang-tidy.",
     )
     parser.add_argument(
         "--clang-tidy-binary",
         required=False,
         default=get_clang_tidy_path(),
-        help="Path to the clang-tidy binary.",
+        help="Path to the clang-tidy binary. "
+        "Required to get the list of enabled checks for this specific version of clang-tidy.",
     )
     parser.add_argument(
-        "--no_fix", required=False, default=False, action="store_true", help="Fix the files."
+        "--no-fix",
+        required=False,
+        default=False,
+        action="store_true",
+        help="Do not modify the files in place.",
     )
     parser.add_argument(
         "--separator",
         required=False,
         default=" ",
-        help="Separator for several checks in a NOLINT comment.",
+        help="Separator for multiple checks in a NOLINT comment. "
+        "For example, ' ' for '// NOLINT(foo, bar)'.",
+    )
+    parser.add_argument(
+        "--extra-checks",
+        required=False,
+        default="",
+        help="Additional checks to enable that are not in the .clang-tidy file. "
+        "Provide as a comma-separated string. For example, 'clang-diagnostic-error'. "
+        "These checks are added to the list of enabled checks.",
     )
     parser.add_argument("files", nargs="+", help="Files to process.")
     args = parser.parse_args()
 
     enabled_checks = get_enabled_checks(args.clang_tidy_binary, args.config_file)
+
+    extra_checks = (
+        [check.strip() for check in args.extra_checks.split(",")] if args.extra_checks else []
+    )
+    enabled_checks += extra_checks
 
     ret_code = 0
     for file in args.files:

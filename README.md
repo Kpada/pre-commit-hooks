@@ -41,15 +41,27 @@ Arguments:
   `PATH`.
 - `--config-file`: Specifies the path to the `.clang-tidy` configuration file.
   Defaults to `.clang-tidy` in the current directory.
-- `--no-fix`: If set, the hook will not overwrite files.
+- `--extra-checks`: Specifies the additional checks to enable in addition to
+  those specified in the `.clang-tidy` file. For example,
+  `'clang-diagnostic-error, foo, bar'`.
 - `--separator`: Specifies the separator string between several checks in a
   `NOLINT` comment. Defaults to ' '.
+- `--no-fix`: If set, the hook will not overwrite files.
 
 Example:
 
 ```yaml
 hooks:
   - id: clang-tidy-nolint
+    args:
+      - --clang-tidy-binary
+      - /usr/bin/clang-tidy
+      - --config-file
+      - configs/.clang-tidy
+      - --extra-checks
+      - "clang-diagnostic-error, foo, bar"
+      - --separator
+      - " "
 ```
 
 ## Development
