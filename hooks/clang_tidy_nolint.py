@@ -120,10 +120,10 @@ def update_checks(content: str, enabled_checks: List[str], separator: str) -> st
         # Remove empty NOLINT comments but preserve formatting
         new_line = re.sub(r"//\s*NOLINT(?:BEGIN|END|NEXTLINE)?\(\s*\)\s*$", "", new_line).rstrip()
 
-        if (
-            new_line != original_line.strip()
-        ):  # Only change the line if the NOLINT comment was modified
-            processed_lines.append(new_line)
+        # Only change the line if the NOLINT comment was modified
+        if new_line != original_line.strip():
+            if new_line:  # Do not add a blank line
+                processed_lines.append(new_line)
         else:
             processed_lines.append(original_line)
 
