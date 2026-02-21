@@ -2,6 +2,7 @@
 .cache/
 __pycache__/
 .pytest_cache/
+.pre-commit-cache/
 
 # Python virtual environment
-venv/
+.venv/
