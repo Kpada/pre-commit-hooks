@@ -12,3 +12,10 @@
   entry: clang_tidy_nolint.py
   language: python
   files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+
+- id: cpp-header-guard
+  name: C++ header guard
+  description: Validates C/C++ header guards using {OPTIONAL_PREFIX_}{FILEPATH}
+  entry: cpp_header_guard.py
+  language: python
+  files: \.(h\+\+|h|hh|hxx|hpp|cuh)$

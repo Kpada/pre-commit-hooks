@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name="clang-tidy-nolint",
-    description="A pre-commit hook to lint clang-tidy NOLINT comments",
+    name="pre-commit-hooks",
+    description="A set of pre-commit hooks for shell and C/C++ codebases",
     url="https://github.com/kpada/pre-commit-hooks",
     version="0.0.0",
     packages=[
@@ -10,5 +10,6 @@ setup(
     ],
     scripts=[
         "hooks/clang_tidy_nolint.py",
+        "hooks/cpp_header_guard.py",
     ],
 )

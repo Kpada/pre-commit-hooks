@@ -6,6 +6,7 @@ A set of [pre-commit](https://pre-commit.com/) hooks for various languages.
 
 - [shfmt](#shfmt)
 - [clang-tidy-nolint](#clang-tidy-nolint)
+- [cpp-header-guard](#cpp-header-guard)
 
 ### shfmt
 
@@ -62,6 +63,37 @@ hooks:
       - "clang-diagnostic-error, foo, bar"
       - --separator
       - " "
+```
+
+### cpp-header-guard
+
+Validates that each C/C++ header file has a guard and that it matches the
+style:
+
+`{OPTIONAL_PREFIX_}{FILEPATH}`
+
+The guard must start with `#ifndef`.
+The closing guard must use `#endif  // <GUARD_NAME>`.
+
+Examples:
+
+- `foo/bar.hpp` -> `FOO_BAR_HPP`
+- with `--prefix PROJECT`: `foo/bar.hpp` -> `PROJECT_FOO_BAR_HPP`
+
+Arguments:
+
+- `--prefix`: Optional guard prefix.
+- `--fix`: Automatically fixes missing/invalid guards in-place.
+
+Example:
+
+```yaml
+hooks:
+  - id: cpp-header-guard
+    args:
+      - --prefix
+      - PROJECT
+      - --fix
 ```
 
 ## Development
