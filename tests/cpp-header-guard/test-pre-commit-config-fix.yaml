@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: cpp-header-guard
+        name: cpp-header-guard
+        entry: python ./hooks/cpp_header_guard.py
+        language: system
+        files: \.(h\+\+|h|hh|hxx|hpp|cuh)$
+        args:
+          - --fix
